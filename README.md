@@ -3,7 +3,7 @@
 
 explote los valores de FilterKeys
 
-![image](https://github.com/user-attachments/assets/58191441-752a-4b3b-be75-7fa73b4987a3)
+![image](https://github.com/user-attachments/assets/8ab6543d-997a-46b6-b413-c95873293a9e)
 
 # REFERENCIAS
 [1](https://geekhack.org/index.php?topic=41881.0)
