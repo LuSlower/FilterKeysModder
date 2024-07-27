@@ -38,7 +38,7 @@ function Console
 }
 
 # crear la clave de registro si no existe
-$regPath = "HKCU:\Control Panel\Accessibility\Keyboard Response"
+$global:regPath = "HKCU:\Control Panel\Accessibility\Keyboard Response"
 
 if (-not (Test-Path $regPath)) {
     New-Item -Path $regPath -Force | Out-Null
@@ -216,7 +216,7 @@ $form.Controls.Add($lblDelayTime)
 $txtDelayTime = New-Object System.Windows.Forms.TextBox
 $txtDelayTime.Location = New-Object System.Drawing.Point(115, 68)
 $txtDelayTime.Width = 50
-$txtDelayTime.Text = $Values.DelayTime
+$txtDelayTime.Text = $Values.DelayBeforeAcceptance
 $form.Controls.Add($txtDelayTime)
 
 # RepeatDelay
@@ -228,7 +228,7 @@ $form.Controls.Add($lblRepeatDelay)
 $txtRepeatDelay = New-Object System.Windows.Forms.TextBox
 $txtRepeatDelay.Location = New-Object System.Drawing.Point(115, 98)
 $txtRepeatDelay.Width = 50
-$txtRepeatDelay.Text = $Values.RepeatDelay
+$txtRepeatDelay.Text = $Values.AutoRepeatDelay
 $form.Controls.Add($txtRepeatDelay)
 
 # RepeatRate
@@ -240,7 +240,7 @@ $form.Controls.Add($lblRepeatRate)
 $txtRepeatRate = New-Object System.Windows.Forms.TextBox
 $txtRepeatRate.Location = New-Object System.Drawing.Point(115, 128)
 $txtRepeatRate.Width = 50
-$txtRepeatRate.Text = $Values.RepeatRate
+$txtRepeatRate.Text = $Values.AutoRepeatRate
 $form.Controls.Add($txtRepeatRate)
 
 # KeyPress event handlers
