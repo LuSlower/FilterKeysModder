@@ -1,4 +1,4 @@
-# Check administrator privileges
+Ôªø# Check administrator privileges
 if (-not ([Security.Principal.WindowsPrincipal] [Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole] "Administrator")) {
     Start-Process powershell "-File `"$PSCommandPath`"" -Verb RunAs
     exit
@@ -53,13 +53,13 @@ function Set-Flags {
     Set-ItemProperty -Path $regPath -Name "Flags" -Value $flag
 }
 
-# establecer los par·metros de las Teclas de Filtro
+# establecer los par√°metros de las Teclas de Filtro
 function Set-FilterKeys-Reg {
     param (
         [int]$bounceTime,    # Intervalo de tiempo para BounceKeys (ms)
         [int]$delayTime,     # Retardo de tiempo para SlowKeys (ms)
-        [int]$repeatRate,    # Frecuencia de repeticiÛn para RepeatKeys (ms)
-        [int]$repeatDelay    # Retardo de repeticiÛn para RepeatKeys (ms)
+        [int]$repeatRate,    # Frecuencia de repetici√≥n para RepeatKeys (ms)
+        [int]$repeatDelay    # Retardo de repetici√≥n para RepeatKeys (ms)
     )
     Set-ItemProperty -path $regPath -name "BounceTime" -value $bounceTime
     Set-ItemProperty -path $regPath -name "DelayBeforeAcceptance" -value $delayTime
@@ -143,7 +143,7 @@ function Get-RegistryValues {
     try {
         $values = Get-ItemProperty -Path $regPath -ErrorAction Stop
 
-        # Asignar los valores a las variables, o $null si no est·n presentes
+        # Asignar los valores a las variables, o $null si no est√°n presentes
         $BounceTime = if ($values.PSObject.Properties["BounceTime"]) { $values.BounceTime } else { $null }
         $DelayBeforeAcceptance = if ($values.PSObject.Properties["DelayBeforeAcceptance"]) { $values.DelayBeforeAcceptance } else { $null }
         $AutoRepeatDelay = if ($values.PSObject.Properties["AutoRepeatDelay"]) { $values.AutoRepeatDelay } else { $null }
@@ -168,6 +168,19 @@ function Get-RegistryValues {
     }
 }
 
+function Update-Values{
+    $Values = Get-RegistryValues -regPath $regPath
+    if ($Values.Flags -ne $null) {
+        $chkEnable.Checked = $true
+    } else {
+        $chkEnable.Checked = $false
+    }
+    $txtBounceTime.Text = $Values.BounceTime
+    $txtDelayTime.Text = $Values.DelayBeforeAcceptance
+    $txtRepeatDelay.Text = $Values.AutoRepeatDelay
+    $txtRepeatRate.Text = $Values.AutoRepeatRate
+}
+
 # ocultar consola, crear el form
 Console -Hide
 [System.Windows.Forms.Application]::EnableVisualStyles();
@@ -178,6 +191,14 @@ $form.MinimizeBox = $false
 $form.Text = "FilterKeysModder"
 $form.StartPosition = "CenterScreen"
 $form.FormBorderStyle = [System.Windows.Forms.FormBorderStyle]::FixedSingle
+$form.KeyPreview = $true
+$form.Add_KeyDown({
+    param($sender, $e)
+    if ($e.KeyCode -eq [System.Windows.Forms.Keys]::F5) {
+        Update-Values
+    }
+})
+
 
 # Obtener los valores
 $Values = Get-RegistryValues -regPath $regPath
@@ -262,8 +283,8 @@ $txtRepeatRate.Add_KeyPress({ OnKeyPress -sender $txtRepeatRate -e $_ })
 
 $btnSave = New-Object System.Windows.Forms.Button
 $btnSave.Text = "Save"
-$btnSave.Size = New-Object System.Drawing.Size(50, 20)
-$btnSave.Location = New-Object System.Drawing.Point(30, 155)
+$btnSave.Size = New-Object System.Drawing.Size(60, 20)
+$btnSave.Location = New-Object System.Drawing.Point(65, 160)
 $form.Controls.Add($btnSave)
 
 # Save
@@ -280,9 +301,9 @@ $btnSave.Add_Click({
 })
 
 $btnReset = New-Object System.Windows.Forms.Button
-$btnReset.Text = "Reset"
-$btnReset.Size = New-Object System.Drawing.Size(50, 20)
-$btnReset.Location = New-Object System.Drawing.Point(100, 155)
+$btnReset.Text = "‚Üª"
+$btnReset.Size = New-Object System.Drawing.Size(20, 17)
+$btnReset.Location = New-Object System.Drawing.Point(155, 165)
 $form.Controls.Add($btnReset)
 
 # Reset
