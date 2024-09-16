@@ -168,7 +168,7 @@ function Get-RegistryValues {
     }
 }
 
-function Update-Values{
+function Update-Values {
     $Values = Get-RegistryValues -regPath $regPath
     if ($Values.Flags -ne $null) {
         $chkEnable.Checked = $true
@@ -179,13 +179,14 @@ function Update-Values{
     $txtDelayTime.Text = $Values.DelayBeforeAcceptance
     $txtRepeatDelay.Text = $Values.AutoRepeatDelay
     $txtRepeatRate.Text = $Values.AutoRepeatRate
+    $lblMeasure.Text = if ($Values.AutoRepeatRate -ne 0) {"{0} keyrepeat per second" -f ([Math]::Round(1000 / $Values.AutoRepeatRate))} else {"0 keypress per second"}
 }
 
 # ocultar consola, crear el form
 Console -Hide
 [System.Windows.Forms.Application]::EnableVisualStyles();
 $form = New-Object System.Windows.Forms.Form
-$form.ClientSize = New-Object System.Drawing.Size(180, 185)
+$form.ClientSize = New-Object System.Drawing.Size(180, 225)
 $form.MaximizeBox = $false
 $form.MinimizeBox = $false
 $form.Text = "FilterKeysModder"
@@ -243,6 +244,7 @@ $form.Controls.Add($lblBounceTime)
 $txtBounceTime = New-Object System.Windows.Forms.TextBox
 $txtBounceTime.Location = New-Object System.Drawing.Point(115, 38)
 $txtBounceTime.Width = 50
+$txtBounceTime.MaxLength = 4
 $txtBounceTime.Text = $Values.BounceTime
 $txtBounceTime.BorderStyle = [System.Windows.Forms.BorderStyle]::FixedSingle
 $txtBounceTime.BackColor = [System.Drawing.Color]::FromArgb(44, 44, 44)
@@ -261,6 +263,7 @@ $form.Controls.Add($lblDelayTime)
 $txtDelayTime = New-Object System.Windows.Forms.TextBox
 $txtDelayTime.Location = New-Object System.Drawing.Point(115, 68)
 $txtDelayTime.Width = 50
+$txtDelayTime.MaxLength = 4
 $txtDelayTime.Text = $Values.DelayBeforeAcceptance
 $txtDelayTime.BorderStyle = [System.Windows.Forms.BorderStyle]::FixedSingle
 $txtDelayTime.BackColor = [System.Drawing.Color]::FromArgb(44, 44, 44)
@@ -278,6 +281,7 @@ $form.Controls.Add($lblRepeatDelay)
 $txtRepeatDelay = New-Object System.Windows.Forms.TextBox
 $txtRepeatDelay.Location = New-Object System.Drawing.Point(115, 98)
 $txtRepeatDelay.Width = 50
+$txtRepeatDelay.MaxLength = 4
 $txtRepeatDelay.Text = $Values.AutoRepeatDelay
 $txtRepeatDelay.BorderStyle = [System.Windows.Forms.BorderStyle]::FixedSingle
 $txtRepeatDelay.BackColor = [System.Drawing.Color]::FromArgb(44, 44, 44)
@@ -295,6 +299,7 @@ $form.Controls.Add($lblRepeatRate)
 $txtRepeatRate = New-Object System.Windows.Forms.TextBox
 $txtRepeatRate.Location = New-Object System.Drawing.Point(115, 128)
 $txtRepeatRate.Width = 50
+$txtRepeatRate.MaxLength = 2
 $txtRepeatRate.Text = $Values.AutoRepeatRate
 $txtRepeatRate.BorderStyle = [System.Windows.Forms.BorderStyle]::FixedSingle
 $txtRepeatRate.BackColor = [System.Drawing.Color]::FromArgb(44, 44, 44)
@@ -318,9 +323,48 @@ $txtDelayTime.Add_KeyPress({ OnKeyPress -sender $txtDelayTime -e $_ })
 $txtRepeatDelay.Add_KeyPress({ OnKeyPress -sender $txtRepeatDelay -e $_ })
 $txtRepeatRate.Add_KeyPress({ OnKeyPress -sender $txtRepeatRate -e $_ })
 
+# Measure
+$lblMeasure = New-Object System.Windows.Forms.Label
+$lblMeasure.Location = New-Object System.Drawing.Point(20, 158)
+$lblMeasure.Size = New-Object System.Drawing.Size(150, 15)
+$lblMeasure.Text = if ($Values.AutoRepeatRate -ne 0) {"{0} keyrepeat per second" -f ([Math]::Round(1000 / $Values.AutoRepeatRate))} else {"0 keypress per second"}
+$lblMeasure.ForeColor = [System.Drawing.Color]::White
+$lblMeasure.BackColor = [System.Drawing.Color]::Transparent
+$form.Controls.Add($lblMeasure)
+
+# Test
+$txtRepeatTest = New-Object System.Windows.Forms.TextBox
+$txtRepeatTest.Location = New-Object System.Drawing.Point(10, 175)
+$txtRepeatTest.Width = 160
+$txtRepeatTest.BorderStyle = [System.Windows.Forms.BorderStyle]::FixedSingle
+$txtRepeatTest.BackColor = [System.Drawing.Color]::FromArgb(44, 44, 44)
+$txtRepeatTest.ForeColor = [System.Drawing.Color]::White
+$txtRepeatTest.Add_KeyPress({
+    param($sender, $e)
+    # Verifica si el carácter presionado es DEL (ASCII 127)
+    if ($e.KeyChar -eq [char]0x007F) {
+        $e.KeyChar = [char]0x08 # Reemplaza con Backspace (ASCII 8)
+    }
+})
+$txtRepeatTest.Add_KeyDown({
+    param($sender, $e)
+    if ($e.Control -and $e.KeyCode -eq [System.Windows.Forms.Keys]::Back) {
+        $textBox = $sender
+        $cursorPos = $textBox.SelectionStart
+
+        if ($cursorPos -gt 0) {
+            $textBox.Text = $textBox.Text.Substring($cursorPos) # Mantiene solo el texto a la derecha del cursor
+            $textBox.SelectionStart = 0 # Mueve el cursor al inicio del texto
+            $e.Handled = $true
+        }
+    }
+})
+
+$form.Controls.Add($txtRepeatTest)
+
 $btnSave = New-Object System.Windows.Forms.Button
-$btnSave.Size = New-Object System.Drawing.Size(60, 20)
-$btnSave.Location = New-Object System.Drawing.Point(65, 160)
+$btnSave.Size = New-Object System.Drawing.Size(70, 20)
+$btnSave.Location = New-Object System.Drawing.Point(60, 200)
 $btnSave.Text = "Save"
 $btnSave.FlatStyle = [System.Windows.Forms.FlatStyle]::Flat
 $btnSave.BackColor = [System.Drawing.Color]::FromArgb(44, 44, 44)
@@ -340,11 +384,12 @@ $btnSave.Add_Click({
     Set-Flags -enable $enableFilterKeys
     Set-FilterKeys-Reg -bounceTime $bounceTime -delayTime $delayTime -repeatRate $repeatRate -repeatDelay $repeatDelay
     Set-FilterKeys -enable $enableFilterKeys -bounceTime $bounceTime -delayTime $delayTime -repeatRate $repeatRate -repeatDelay $repeatDelay
+    Update-Values
 })
 
 $btnReset = New-Object System.Windows.Forms.Button
 $btnReset.Size = New-Object System.Drawing.Size(20, 17)
-$btnReset.Location = New-Object System.Drawing.Point(155, 162)
+$btnReset.Location = New-Object System.Drawing.Point(155, 202)
 $btnReset.Text = "↻"
 $btnReset.FlatStyle = [System.Windows.Forms.FlatStyle]::Flat
 $btnReset.BackColor = [System.Drawing.Color]::FromArgb(44, 44, 44)
@@ -357,6 +402,7 @@ $btnReset.Add_Click({
     Set-Flags -enable $false
     Remove-ItemProperty -Path $regPath -Name "*"
     Set-FilterKeys -enable $false -bounceTime 0 -delayTime 0 -repeatRate 0 -repeatDelay 0
+    Update-Values
 })
 
 $form.ShowDialog()
