@@ -199,15 +199,32 @@ $form.Add_KeyDown({
     }
 })
 
+$form.Add_Paint({
+    param (
+        [object]$sender,
+        [System.Windows.Forms.PaintEventArgs]$e
+    )
+    $rect = New-Object System.Drawing.Rectangle(0, 0, $sender.Width, $sender.Height)
+    $brush = New-Object System.Drawing.Drawing2D.LinearGradientBrush(
+        $rect,
+        [System.Drawing.Color]::FromArgb(44, 44, 44),   # Color negro
+        [System.Drawing.Color]::FromArgb(99, 99, 99),# Color gris oscuro
+        [System.Drawing.Drawing2D.LinearGradientMode]::Vertical
+    )
+    $e.Graphics.FillRectangle($brush, $rect)
+})
+
 
 # Obtener los valores
 $Values = Get-RegistryValues -regPath $regPath
 
 # FilterKeyssOn
 $chkEnable = New-Object System.Windows.Forms.CheckBox
-$chkEnable.Text = "On FilterKeys"
-$chkEnable.AutoSize = $true
 $chkEnable.Location = New-Object System.Drawing.Point(50, 10)
+$chkEnable.Text = "On FilterKeys"
+$chkEnable.ForeColor = [System.Drawing.Color]::White
+$chkEnable.BackColor = [System.Drawing.Color]::Transparent
+$chkEnable.AutoSize = $true
 
 if ($Values.Flags -ne $null) {
     $chkEnable.Checked = $true
@@ -217,51 +234,71 @@ $form.Controls.Add($chkEnable)
 
 # BounceTime
 $lblBounceTime = New-Object System.Windows.Forms.Label
-$lblBounceTime.Text = "BounceTime (ms):"
 $lblBounceTime.Location = New-Object System.Drawing.Point(12, 40)
+$lblBounceTime.Text = "BounceTime (ms):"
+$lblBounceTime.ForeColor = [System.Drawing.Color]::White
+$lblBounceTime.BackColor = [System.Drawing.Color]::Transparent
 $form.Controls.Add($lblBounceTime)
 
 $txtBounceTime = New-Object System.Windows.Forms.TextBox
 $txtBounceTime.Location = New-Object System.Drawing.Point(115, 38)
 $txtBounceTime.Width = 50
 $txtBounceTime.Text = $Values.BounceTime
+$txtBounceTime.BorderStyle = [System.Windows.Forms.BorderStyle]::FixedSingle
+$txtBounceTime.BackColor = [System.Drawing.Color]::FromArgb(44, 44, 44)
+$txtBounceTime.ForeColor = [System.Drawing.Color]::White
 $form.Controls.Add($txtBounceTime)
 
 # DelayTime
 $lblDelayTime = New-Object System.Windows.Forms.Label
-$lblDelayTime.Text = "DelayTime (ms):"
 $lblDelayTime.Size = New-Object System.Drawing.Size(90, 15)
 $lblDelayTime.Location = New-Object System.Drawing.Point(20, 70)
+$lblDelayTime.Text = "DelayTime (ms):"
+$lblDelayTime.ForeColor = [System.Drawing.Color]::White
+$lblDelayTime.BackColor = [System.Drawing.Color]::Transparent
 $form.Controls.Add($lblDelayTime)
 
 $txtDelayTime = New-Object System.Windows.Forms.TextBox
 $txtDelayTime.Location = New-Object System.Drawing.Point(115, 68)
 $txtDelayTime.Width = 50
 $txtDelayTime.Text = $Values.DelayBeforeAcceptance
+$txtDelayTime.BorderStyle = [System.Windows.Forms.BorderStyle]::FixedSingle
+$txtDelayTime.BackColor = [System.Drawing.Color]::FromArgb(44, 44, 44)
+$txtDelayTime.ForeColor = [System.Drawing.Color]::White
 $form.Controls.Add($txtDelayTime)
 
 # RepeatDelay
 $lblRepeatDelay = New-Object System.Windows.Forms.Label
-$lblRepeatDelay.Text = "RepeatDelay (ms):"
 $lblRepeatDelay.Location = New-Object System.Drawing.Point(10, 100)
+$lblRepeatDelay.Text = "RepeatDelay (ms):"
+$lblRepeatDelay.ForeColor = [System.Drawing.Color]::White
+$lblRepeatDelay.BackColor = [System.Drawing.Color]::Transparent
 $form.Controls.Add($lblRepeatDelay)
 
 $txtRepeatDelay = New-Object System.Windows.Forms.TextBox
 $txtRepeatDelay.Location = New-Object System.Drawing.Point(115, 98)
 $txtRepeatDelay.Width = 50
 $txtRepeatDelay.Text = $Values.AutoRepeatDelay
+$txtRepeatDelay.BorderStyle = [System.Windows.Forms.BorderStyle]::FixedSingle
+$txtRepeatDelay.BackColor = [System.Drawing.Color]::FromArgb(44, 44, 44)
+$txtRepeatDelay.ForeColor = [System.Drawing.Color]::White
 $form.Controls.Add($txtRepeatDelay)
 
 # RepeatRate
 $lblRepeatRate = New-Object System.Windows.Forms.Label
-$lblRepeatRate.Text = "RepeatRate (ms):"
 $lblRepeatRate.Location = New-Object System.Drawing.Point(15, 130)
+$lblRepeatRate.Text = "RepeatRate (ms):"
+$lblRepeatRate.ForeColor = [System.Drawing.Color]::White
+$lblRepeatRate.BackColor = [System.Drawing.Color]::Transparent
 $form.Controls.Add($lblRepeatRate)
 
 $txtRepeatRate = New-Object System.Windows.Forms.TextBox
 $txtRepeatRate.Location = New-Object System.Drawing.Point(115, 128)
 $txtRepeatRate.Width = 50
 $txtRepeatRate.Text = $Values.AutoRepeatRate
+$txtRepeatRate.BorderStyle = [System.Windows.Forms.BorderStyle]::FixedSingle
+$txtRepeatRate.BackColor = [System.Drawing.Color]::FromArgb(44, 44, 44)
+$txtRepeatRate.ForeColor = [System.Drawing.Color]::White
 $form.Controls.Add($txtRepeatRate)
 
 # KeyPress event handlers
@@ -282,9 +319,14 @@ $txtRepeatDelay.Add_KeyPress({ OnKeyPress -sender $txtRepeatDelay -e $_ })
 $txtRepeatRate.Add_KeyPress({ OnKeyPress -sender $txtRepeatRate -e $_ })
 
 $btnSave = New-Object System.Windows.Forms.Button
-$btnSave.Text = "Save"
 $btnSave.Size = New-Object System.Drawing.Size(60, 20)
 $btnSave.Location = New-Object System.Drawing.Point(65, 160)
+$btnSave.Text = "Save"
+$btnSave.FlatStyle = [System.Windows.Forms.FlatStyle]::Flat
+$btnSave.BackColor = [System.Drawing.Color]::FromArgb(44, 44, 44)
+$btnSave.ForeColor = [System.Drawing.Color]::White
+$btnSave.FlatAppearance.BorderSize = 0
+
 $form.Controls.Add($btnSave)
 
 # Save
@@ -301,9 +343,13 @@ $btnSave.Add_Click({
 })
 
 $btnReset = New-Object System.Windows.Forms.Button
-$btnReset.Text = "↻"
 $btnReset.Size = New-Object System.Drawing.Size(20, 17)
-$btnReset.Location = New-Object System.Drawing.Point(155, 165)
+$btnReset.Location = New-Object System.Drawing.Point(155, 162)
+$btnReset.Text = "↻"
+$btnReset.FlatStyle = [System.Windows.Forms.FlatStyle]::Flat
+$btnReset.BackColor = [System.Drawing.Color]::FromArgb(44, 44, 44)
+$btnReset.ForeColor = [System.Drawing.Color]::White
+$btnReset.FlatAppearance.BorderSize = 0
 $form.Controls.Add($btnReset)
 
 # Reset
